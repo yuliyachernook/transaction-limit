@@ -33,5 +33,4 @@ exchange:
       pairs:
         KZT/USD,RUB/USD
     cron:
-      expression: "0/30 * * * * ?"
-#      expression: "0 0 8,16 * * ?"
+      expression: "0 0 8 * * ?"

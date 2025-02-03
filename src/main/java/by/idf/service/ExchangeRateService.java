@@ -31,24 +31,29 @@ public class ExchangeRateService {
 
     @Scheduled(cron = "${exchange.rate.cron.expression}")
     public void updateExchangeRate() {
+        LocalDate today = LocalDate.now();
         for (String pair : serviceConfiguration.getCurrencyPairs()) {
             String[] currencies = pair.split("/");
+
+            if (exchangeRateRepository.findByCurrencyPairAndDateTime(pair, today).isPresent()) {
+                continue;
+            }
+
             ResponseEntity<ExchangeRateDto> response = exchangeRateClient.getExchangeRate(FX_DAILY, currencies[0], currencies[1], serviceConfiguration.getApiKey());
             if (response.getStatusCode().is2xxSuccessful()) {
                 ExchangeRateDto exchangeRateDto = response.getBody();
                 if (exchangeRateDto != null) {
                     Map<String, TimeSeriesData> values = exchangeRateDto.getTimeSeries();
-                    String today = LocalDate.now().toString();
 
                     Optional<TimeSeriesData> todayValue = values.entrySet().stream()
-                            .filter(entry -> entry.getKey().equals(today))
+                            .filter(entry -> entry.getKey().equals(today.toString()))
                             .map(Map.Entry::getValue)
                             .findFirst();
 
                     if (todayValue.isPresent()) {
                         ExchangeRate exchangeRate = new ExchangeRate();
                         exchangeRate.setCurrencyPair(pair);
-                        exchangeRate.setDateTime(LocalDate.now());
+                        exchangeRate.setDateTime(today);
                         exchangeRate.setRate(new BigDecimal(todayValue.get().getClose()));
                         exchangeRateRepository.save(exchangeRate);
 
@@ -79,5 +84,4 @@ public class ExchangeRateService {
         log.error("Exchange rate not found for {} at {}", currencyPair, transactionDateTime);
         throw new RuntimeException("Exchange rate is not found");
     }
-
 }
