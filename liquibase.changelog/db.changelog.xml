@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="1" author="yuliya_chernook">
+        <createTable tableName="exchange_rate">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="currency_pair" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rate" type="decimal(10,5)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_time" type="date">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2" author="yuliya_chernook">
+        <createTable tableName="transaction_limit">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="account_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="currency_shortname" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sum" type="decimal(10,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expense_category" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_time" type="timestamp with time zone" defaultValueComputed="current_timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2" author="yuliya_chernook">
+        <createTable tableName="transactions">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="account_from" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="account_to" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="currency_shortname" type="varchar(15)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sum" type="decimal(10,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expense_category" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_time" type="timestamp with time zone" defaultValueComputed="current_timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="limit_exceeded" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="transactions"
+                baseColumnNames="transaction_limit_id"
+                referencedTableName="transaction_limit"
+                referencedColumnNames="id"
+                constraintName="fk_transaction_limit"/>
+    </changeSet>
+
+</databaseChangeLog>

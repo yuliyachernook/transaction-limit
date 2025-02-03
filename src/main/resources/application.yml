@@ -1,0 +1,37 @@
+server:
+  port: 8101
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/mydatabase
+    username: myuser
+    password: mypassword
+    driver-class-name: org.postgresql.Driver
+    initialization-mode: always
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: "org.hibernate.dialect.PostgreSQLDialect"
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+feign:
+  client:
+    alphaVantage:
+      url: https://www.alphavantage.co
+
+exchange:
+  rate:
+    api: kC8TAVZRVYUV8P2WV
+    currency:
+      pairs:
+        KZT/USD,RUB/USD
+    cron:
+      expression: "0/30 * * * * ?"
+#      expression: "0 0 8,16 * * ?"

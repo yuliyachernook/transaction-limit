@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8101:8101"
+    depends_on:
+      - database
+    networks:
+      - app-network
+
+  database:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: mydatabase
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+    ports:
+      - "5432:5432"
+    networks:
+      - app-network
+
+  liquibase:
+    image: liquibase/liquibase:latest
+    environment:
+      LIQUIBASE_COMMAND_URL: jdbc:postgresql://database:5432/mydatabase
+      LIQUIBASE_COMMAND_USERNAME: myuser
+      LIQUIBASE_COMMAND_PASSWORD: mypassword
+      LIQUIBASE_COMMAND_CHANGELOG_FILE: db.changelog.xml
+      LIQUIBASE_SEARCH_PATH: /liquibase/changelog
+    volumes:
+      - ./liquibase/changelog:/liquibase/changelog
+    depends_on:
+      - database
+    entrypoint: [ "liquibase", "--changeLogFile=db.changelog.xml", "update" ]
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
