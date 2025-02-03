@@ -7,7 +7,7 @@
 
     <changeSet id="1" author="yuliya_chernook">
         <createTable tableName="exchange_rate">
-            <column name="id" type="bigint">
+            <column name="id" type="bigserial">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="currency_pair" type="varchar(20)">
@@ -16,7 +16,7 @@
             <column name="rate" type="decimal(10,5)">
                 <constraints nullable="false"/>
             </column>
-            <column name="date_time" type="date">
+            <column name="date_time" type="timestamp with time zone" defaultValueComputed="current_timestamp">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -24,7 +24,7 @@
 
     <changeSet id="2" author="yuliya_chernook">
         <createTable tableName="transaction_limit">
-            <column name="id" type="bigint">
+            <column name="id" type="bigserial">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="account_id" type="bigint">
@@ -45,9 +45,9 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="2" author="yuliya_chernook">
+    <changeSet id="3" author="yuliya_chernook">
         <createTable tableName="transactions">
-            <column name="id" type="bigint">
+            <column name="id" type="bigserial">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="account_from" type="bigint">
@@ -70,6 +70,8 @@
             </column>
             <column name="limit_exceeded" type="boolean">
                 <constraints nullable="false"/>
+            </column>
+            <column name="transaction_limit_id" type="bigint">
             </column>
         </createTable>
 

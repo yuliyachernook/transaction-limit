@@ -1,6 +1,7 @@
 package by.idf.dto;
 
 import by.idf.entity.CategoryEnum;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,4 +26,7 @@ public class LimitDto {
     private BigDecimal sum;
     @Schema(description = "Категория расходов", allowableValues = {"SERVICE", "PRODUCT"})
     private CategoryEnum expenseCategory;
+    @Schema(description = "Дата и время", example = "2023-10-01T10:15:30+03")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSX")
+    private ZonedDateTime dateTime;
 }

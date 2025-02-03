@@ -103,15 +103,14 @@ public class ExchangeRateTest {
         ExchangeRate exchangeRate = new ExchangeRate();
         exchangeRate.setRate(expectedRate);
 
-        when(exchangeRateRepository.findByCurrencyPairAndDateTime(KZT_USD_PAIR, transactionDateTime.toLocalDate()))
+        when(exchangeRateRepository.findLatestExchangeRateForCurrencyPairBeforeDateTime(KZT_USD_PAIR, transactionDateTime))
                 .thenReturn(Optional.of(exchangeRate));
 
         BigDecimal actualRate = exchangeRateService.getExchangeRate(KZT_CURRENCY, USD_CURRENCY, transactionDateTime);
 
         assertEquals(expectedRate, actualRate);
 
-        verify(exchangeRateRepository, times(1)).findByCurrencyPairAndDateTime(KZT_USD_PAIR, transactionDateTime.toLocalDate());
-        verify(exchangeRateRepository, never()).findLatestExchangeRateForCurrencyPairBeforeDateTime(any(), any());
+        verify(exchangeRateRepository, times(1)).findLatestExchangeRateForCurrencyPairBeforeDateTime(KZT_USD_PAIR, transactionDateTime);
     }
 
     @Test
@@ -121,17 +120,17 @@ public class ExchangeRateTest {
         ExchangeRate previousExchangeRate = new ExchangeRate();
         previousExchangeRate.setRate(expectedRate);
 
-        when(exchangeRateRepository.findByCurrencyPairAndDateTime(KZT_USD_PAIR, transactionDateTime.toLocalDate()))
+        when(exchangeRateRepository.findLatestExchangeRateForCurrencyPairBeforeDateTime(KZT_USD_PAIR, transactionDateTime))
                 .thenReturn(Optional.empty());
-        when(exchangeRateRepository.findLatestExchangeRateForCurrencyPairBeforeDateTime(KZT_USD_PAIR, transactionDateTime.toLocalDate()))
+        when(exchangeRateRepository.findLatestExchangeRateForCurrencyPairBeforeDateTime(KZT_USD_PAIR, transactionDateTime))
                 .thenReturn(Optional.of(previousExchangeRate));
 
         BigDecimal actualRate = exchangeRateService.getExchangeRate(KZT_CURRENCY, USD_CURRENCY, transactionDateTime);
 
         assertEquals(expectedRate, actualRate);
 
-        verify(exchangeRateRepository, times(1)).findByCurrencyPairAndDateTime(KZT_USD_PAIR, transactionDateTime.toLocalDate());
-        verify(exchangeRateRepository, times(1)).findLatestExchangeRateForCurrencyPairBeforeDateTime(KZT_USD_PAIR, transactionDateTime.toLocalDate());
+        verify(exchangeRateRepository, times(1)).findLatestExchangeRateForCurrencyPairBeforeDateTime(KZT_USD_PAIR, transactionDateTime);
+        verify(exchangeRateRepository, times(1)).findLatestExchangeRateForCurrencyPairBeforeDateTime(KZT_USD_PAIR, transactionDateTime);
     }
 
     @Test
@@ -141,18 +140,16 @@ public class ExchangeRateTest {
         ExchangeRate exchangeRate = new ExchangeRate();
         exchangeRate.setRate(expectedRate);
 
-        when(exchangeRateRepository.findByCurrencyPairAndDateTime(KZT_USD_PAIR, transactionDateTime.toLocalDate()))
+        when(exchangeRateRepository.findLatestExchangeRateForCurrencyPairBeforeDateTime(KZT_USD_PAIR, transactionDateTime))
                 .thenReturn(Optional.empty());
-        when(exchangeRateRepository.findLatestExchangeRateForCurrencyPairBeforeDateTime(KZT_USD_PAIR, transactionDateTime.toLocalDate()))
+        when(exchangeRateRepository.findLatestExchangeRateForCurrencyPairBeforeDateTime(KZT_USD_PAIR, transactionDateTime))
                 .thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            exchangeRateService.getExchangeRate(KZT_CURRENCY, USD_CURRENCY, transactionDateTime);
-        });
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> exchangeRateService.getExchangeRate(KZT_CURRENCY, USD_CURRENCY, transactionDateTime));
 
         assertEquals("Exchange rate is not found", exception.getMessage());
 
-        verify(exchangeRateRepository, times(1)).findByCurrencyPairAndDateTime(KZT_USD_PAIR, transactionDateTime.toLocalDate());
-        verify(exchangeRateRepository, times(1)).findLatestExchangeRateForCurrencyPairBeforeDateTime(KZT_USD_PAIR, transactionDateTime.toLocalDate());
+        verify(exchangeRateRepository, times(1)).findLatestExchangeRateForCurrencyPairBeforeDateTime(KZT_USD_PAIR, transactionDateTime);
+        verify(exchangeRateRepository, times(1)).findLatestExchangeRateForCurrencyPairBeforeDateTime(KZT_USD_PAIR, transactionDateTime);
     }
 }

@@ -1,7 +1,7 @@
 package by.idf.service;
 
-import by.idf.config.ServiceConfiguration;
 import by.idf.client.ExchangeRateClient;
+import by.idf.config.ServiceConfiguration;
 import by.idf.dto.exchange.ExchangeRateDto;
 import by.idf.dto.exchange.TimeSeriesData;
 import by.idf.entity.ExchangeRate;
@@ -13,7 +13,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Optional;
@@ -31,33 +30,25 @@ public class ExchangeRateService {
 
     @Scheduled(cron = "${exchange.rate.cron.expression}")
     public void updateExchangeRate() {
-        LocalDate today = LocalDate.now();
+        ZonedDateTime today = ZonedDateTime.now();
         for (String pair : serviceConfiguration.getCurrencyPairs()) {
             String[] currencies = pair.split("/");
-
-            if (exchangeRateRepository.findByCurrencyPairAndDateTime(pair, today).isPresent()) {
-                continue;
-            }
 
             ResponseEntity<ExchangeRateDto> response = exchangeRateClient.getExchangeRate(FX_DAILY, currencies[0], currencies[1], serviceConfiguration.getApiKey());
             if (response.getStatusCode().is2xxSuccessful()) {
                 ExchangeRateDto exchangeRateDto = response.getBody();
                 if (exchangeRateDto != null) {
-                    Map<String, TimeSeriesData> values = exchangeRateDto.getTimeSeries();
+                    Map<String, TimeSeriesData> timeSeries = exchangeRateDto.getTimeSeries();
+                    TimeSeriesData todayData = timeSeries.get(today.toLocalDate().toString());
 
-                    Optional<TimeSeriesData> todayValue = values.entrySet().stream()
-                            .filter(entry -> entry.getKey().equals(today.toString()))
-                            .map(Map.Entry::getValue)
-                            .findFirst();
-
-                    if (todayValue.isPresent()) {
+                    if (todayData != null) {
                         ExchangeRate exchangeRate = new ExchangeRate();
                         exchangeRate.setCurrencyPair(pair);
                         exchangeRate.setDateTime(today);
-                        exchangeRate.setRate(new BigDecimal(todayValue.get().getClose()));
+                        exchangeRate.setRate(new BigDecimal(todayData.getClose()));
                         exchangeRateRepository.save(exchangeRate);
 
-                        log.info("Saved exchange rate {} for {}.", todayValue.get().getClose(), pair);
+                        log.info("Saved exchange rate {} for {}.", todayData.getClose(), pair);
                     } else {
                         log.error("No exchange rate data for today for: {}", pair);
                     }
@@ -71,12 +62,7 @@ public class ExchangeRateService {
     public BigDecimal getExchangeRate(String fromCurrency, String toCurrency, ZonedDateTime transactionDateTime) {
         String currencyPair = fromCurrency + "/" + toCurrency;
 
-        Optional<ExchangeRate> exchangeRate = exchangeRateRepository.findByCurrencyPairAndDateTime(currencyPair, transactionDateTime.toLocalDate());
-        if (exchangeRate.isPresent()) {
-            return exchangeRate.get().getRate();
-        }
-
-        Optional<ExchangeRate> lastAvailableExchangeRate = exchangeRateRepository.findLatestExchangeRateForCurrencyPairBeforeDateTime(currencyPair, transactionDateTime.toLocalDate());
+        Optional<ExchangeRate> lastAvailableExchangeRate = exchangeRateRepository.findLatestExchangeRateForCurrencyPairBeforeDateTime(currencyPair, transactionDateTime);
         if (lastAvailableExchangeRate.isPresent()) {
             return lastAvailableExchangeRate.get().getRate();
         }
