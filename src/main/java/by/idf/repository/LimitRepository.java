@@ -13,9 +13,9 @@ import java.util.Optional;
 public interface LimitRepository extends JpaRepository<Limit, Long> {
 
     @Query(value = "SELECT * FROM transaction_limit l " +
-            "WHERE l.account_id = :accountId AND l.expense_category = :expenseCategory AND l.date_time < :dateTime " +
+            "WHERE l.account_id = :accountId AND l.expense_category = :expenseCategory AND l.date_time between :startDateTime and :endDateTime " +
             "ORDER BY l.date_time DESC LIMIT 1", nativeQuery = true)
-    Optional<Limit> findLatestLimitByAccountIdAndExpenseCategoryBeforeDateTime(long accountId, String expenseCategory, ZonedDateTime dateTime);
+    Optional<Limit> findLatestLimitByAccountIdAndExpenseCategoryBetweenDateTime(long accountId, String expenseCategory, ZonedDateTime startDateTime, ZonedDateTime endDateTime);
 
     List<Limit> findAllByAccountId(long accountId);
 }

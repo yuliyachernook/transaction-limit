@@ -40,7 +40,7 @@ public class TransactionService {
         ZonedDateTime transactionDateTime = transaction.getDateTime();
         ZonedDateTime monthStart = transactionDateTime.withDayOfMonth(1).truncatedTo(ChronoUnit.DAYS);
 
-        Limit actualTransactionLimit = limitRepository.findLatestLimitByAccountIdAndExpenseCategoryBeforeDateTime(account, category.getName(), transactionDateTime)
+        Limit actualTransactionLimit = limitRepository.findLatestLimitByAccountIdAndExpenseCategoryBetweenDateTime(account, category.getName(), monthStart, transactionDateTime)
                 .orElseGet(() -> {
                     Limit newTransactionLimit = new Limit(transaction.getAccountFrom(), USD_CURRENCY, BigDecimal.valueOf(1000.00), transaction.getExpenseCategory(), monthStart);
                     limitRepository.save(newTransactionLimit);
@@ -80,4 +80,4 @@ public class TransactionService {
         BigDecimal exchangeRate = exchangeRateService.getExchangeRate(currencyShortname, USD_CURRENCY, transactionDateTime);
         return sum.multiply(exchangeRate);
     }
- }
+}
